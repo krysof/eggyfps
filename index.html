@@ -6,7 +6,11 @@
 <title>EGGY FPS — 蛋宝格斗</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #05070a; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden; background: #05070a;
+    touch-action: none; -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
   canvas { display: block; width: 100%; height: 100%; }
 
   #hud {
@@ -91,6 +95,48 @@
     opacity: 0; transition: opacity 0.18s ease;
   }
 
+  /* 触屏操作层：只在真的摸过屏幕之后才出现，鼠标玩家看不到 */
+  #touch { position: absolute; inset: 0; display: none; pointer-events: none; }
+  body.touch #touch { display: block; }
+  body.touch #lock, body.touch .tag { display: none; }
+
+  #stick {
+    position: absolute; left: 26px; bottom: 92px;
+    width: 132px; height: 132px; border-radius: 50%;
+    background: rgba(8, 12, 16, 0.34); border: 1px solid rgba(160, 200, 225, 0.30);
+    backdrop-filter: blur(6px); pointer-events: auto;
+  }
+  #stick i {
+    position: absolute; left: 50%; top: 50%; width: 56px; height: 56px;
+    margin: -28px 0 0 -28px; border-radius: 50%;
+    background: rgba(210, 232, 245, 0.5); border: 1px solid rgba(235, 248, 255, 0.7);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  #touch b {
+    position: absolute; display: grid; place-content: center;
+    border-radius: 50%; pointer-events: auto;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.06em;
+    color: #e6f2fa; background: rgba(10, 16, 22, 0.46);
+    border: 1px solid rgba(150, 195, 225, 0.38);
+    backdrop-filter: blur(6px); transition: transform 0.06s ease, background 0.06s ease;
+  }
+  #touch b.on { transform: scale(0.92); background: rgba(90, 165, 225, 0.55); }
+  /* 主招在最顺手的位置、也最大 —— 拇指默认落点就是波动拳 */
+  #touch b.hd { right: 24px;  bottom: 96px;  width: 92px; height: 92px; font-size: 17px;
+                border-color: rgba(120, 205, 255, 0.6); }
+  #touch b.sr { right: 118px; bottom: 158px; width: 74px; height: 74px; }
+  #touch b.ts { right: 128px; bottom: 66px;  width: 74px; height: 74px; }
+  #touch b.sp { right: 34px;  bottom: 200px; width: 74px; height: 74px;
+                color: #ffe6a8; border-color: rgba(255, 205, 120, 0.55); }
+  #touch b.rl { left: 176px;  bottom: 96px;  width: 66px; height: 66px; font-size: 13px; }
+  #touch b.sn { left: 176px;  bottom: 172px; width: 66px; height: 66px; font-size: 13px; }
+  /* 竖屏摆不下左右两列，翻滚/冲刺挪到摇杆正上方，否则会压在旋风和升龙上 */
+  @media (max-width: 560px) {
+    #touch b.rl { left: 26px;  bottom: 236px; }
+    #touch b.sn { left: 100px; bottom: 236px; }
+  }
+
   #loading {
     position: fixed; inset: 0; display: grid; place-content: center; gap: 18px;
     justify-items: center; background: #05070a; z-index: 10;
@@ -103,7 +149,7 @@
   }
   #loading p { font-size: 12px; letter-spacing: 0.28em; color: #55656f; text-transform: uppercase; }
 </style>
-  <script type="module" crossorigin src="./assets/index-C_-vttja.js"></script>
+  <script type="module" crossorigin src="./assets/index-CYniG13Y.js"></script>
 </head>
 <body>
   <div id="hud">
@@ -113,6 +159,16 @@
     <div id="move"></div>
     <div id="gauge"><i></i></div>
     <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 波动拳 &nbsp;·&nbsp; 右键 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚</div>
+
+    <div id="touch">
+      <div id="stick"><i></i></div>
+      <b class="hd" data-key="KeyJ">波动</b>
+      <b class="sr" data-key="KeyK">升龙</b>
+      <b class="ts" data-key="KeyQ">旋风</b>
+      <b class="sp" data-key="KeyF">真空</b>
+      <b class="rl" data-key="Space">翻滚</b>
+      <b class="sn" data-hold="ShiftLeft">冲刺</b>
+    </div>
   </div>
 
   <div id="loading">
