@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>EGGY FPS — 蛋宝格斗</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #05070a; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  #hud {
+    position: fixed; inset: 0; pointer-events: none;
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    color: #e8eef2; user-select: none;
+  }
+  .tag {
+    position: absolute; top: 16px; left: 16px;
+    padding: 7px 14px; border-radius: 999px;
+    background: rgba(8, 12, 16, 0.55); border: 1px solid rgba(180, 205, 220, 0.18);
+    backdrop-filter: blur(8px);
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: #9fb4c2;
+  }
+  .tag b { color: #d9a441; font-weight: 700; }
+
+  #stats {
+    position: absolute; top: 16px; right: 16px; text-align: right;
+    font-size: 11px; line-height: 1.7; color: #8ea3b2;
+    font-variant-numeric: tabular-nums;
+    background: rgba(8, 12, 16, 0.55); border: 1px solid rgba(180, 205, 220, 0.14);
+    border-radius: 10px; padding: 8px 12px; backdrop-filter: blur(8px);
+  }
+  #stats span { color: #d9e6ef; }
+
+  #lock {
+    position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+    font-size: 12px; letter-spacing: 0.06em; color: #7d919f;
+    background: rgba(8, 12, 16, 0.5); border: 1px solid rgba(180, 205, 220, 0.14);
+    border-radius: 999px; padding: 8px 18px; backdrop-filter: blur(8px);
+    white-space: nowrap; transition: opacity 0.35s ease;
+  }
+
+  /* 准星：四根从中心向外推的短线，--s 是扩散半径，由射击和移动实时改 */
+  #cross {
+    position: absolute; left: 50%; top: 50%; width: 0; height: 0;
+    --s: 9px; transition: opacity 0.15s ease;
+  }
+  #cross i {
+    position: absolute; display: block; background: #eef5f8;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+  }
+  #cross .ct, #cross .cb { width: 2px; height: 8px; left: -1px; }
+  #cross .cl, #cross .cr { width: 8px; height: 2px; top: -1px; }
+  #cross .ct { bottom: var(--s); }
+  #cross .cb { top: var(--s); }
+  #cross .cl { right: var(--s); }
+  #cross .cr { left: var(--s); }
+  #cross::after {
+    content: ''; position: absolute; width: 2px; height: 2px; left: -1px; top: -1px;
+    background: rgba(238, 245, 248, 0.55);
+  }
+
+  /* 气槽：满槽时描边亮起并呼吸，超必杀可用与否一眼能看出来 */
+  #gauge {
+    position: absolute; left: 34px; bottom: 30px;
+    width: 260px; height: 12px; border-radius: 999px;
+    background: rgba(8, 12, 16, 0.6);
+    border: 1px solid rgba(120, 175, 220, 0.28);
+    overflow: hidden; backdrop-filter: blur(8px);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  #gauge i {
+    display: block; height: 100%; width: 0;
+    background: linear-gradient(90deg, #1f6fd0, #4fb4ff 70%, #cdeaff);
+    box-shadow: 0 0 12px rgba(79, 180, 255, 0.65);
+    transition: width 0.12s linear;
+  }
+  #gauge.full {
+    border-color: rgba(255, 226, 150, 0.8);
+    box-shadow: 0 0 22px rgba(255, 200, 90, 0.5);
+    animation: ki 1.1s ease-in-out infinite;
+  }
+  #gauge.full i { background: linear-gradient(90deg, #e0952c, #ffd166 65%, #fff6dc); }
+  @keyframes ki { 50% { box-shadow: 0 0 34px rgba(255, 200, 90, 0.85); } }
+
+  #move {
+    position: absolute; left: 34px; bottom: 54px;
+    font-size: 19px; font-weight: 800; letter-spacing: 0.22em;
+    color: #ffe6a8; text-shadow: 0 0 18px rgba(255, 180, 70, 0.7), 0 2px 8px rgba(0, 0, 0, 0.9);
+    opacity: 0; transition: opacity 0.18s ease;
+  }
+
+  #loading {
+    position: fixed; inset: 0; display: grid; place-content: center; gap: 18px;
+    justify-items: center; background: #05070a; z-index: 10;
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    transition: opacity 0.7s ease;
+  }
+  #loading.done { opacity: 0; pointer-events: none; }
+  #loading h1 {
+    font-size: 34px; font-weight: 800; letter-spacing: 0.16em; color: #d9a441;
+  }
+  #loading p { font-size: 12px; letter-spacing: 0.28em; color: #55656f; text-transform: uppercase; }
+</style>
+  <script type="module" crossorigin src="./assets/index-BHn3V01Q.js"></script>
+</head>
+<body>
+  <div id="hud">
+    <div class="tag">EGGY <b>FPS</b> — 蛋宝格斗</div>
+    <div id="stats"></div>
+    <div id="cross"><i class="ct"></i><i class="cb"></i><i class="cl"></i><i class="cr"></i></div>
+    <div id="move"></div>
+    <div id="gauge"><i></i></div>
+    <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 波动拳 &nbsp;·&nbsp; 右键 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚</div>
+  </div>
+
+  <div id="loading">
+    <h1>EGGY</h1>
+    <p>Building Scene</p>
+  </div>
+
+</body>
+</html>
