@@ -28,8 +28,20 @@
   }
   .tag b { color: #d9a441; font-weight: 700; }
 
+  /* 静音键。手机上比键盘更需要它，所以放在 HUD 里而不是只做个 M 快捷键 */
+  #mute {
+    position: absolute; top: 12px; right: 16px;
+    width: 34px; height: 34px; border-radius: 50%;
+    display: grid; place-content: center; cursor: pointer;
+    background: rgba(10, 16, 22, 0.46); border: 1px solid rgba(150, 195, 225, 0.38);
+    color: #d6ecfa; font-size: 15px; line-height: 1;
+    pointer-events: auto; backdrop-filter: blur(6px);
+    -webkit-tap-highlight-color: transparent;
+  }
+  #mute.off { color: #6d7a86; border-color: rgba(150, 195, 225, 0.18); }
+
   #stats {
-    position: absolute; top: 16px; right: 16px; text-align: right;
+    position: absolute; top: 56px; right: 16px; text-align: right;
     font-size: 11px; line-height: 1.7; color: #8ea3b2;
     font-variant-numeric: tabular-nums;
     background: rgba(8, 12, 16, 0.55); border: 1px solid rgba(180, 205, 220, 0.14);
@@ -133,18 +145,20 @@
   #touch b.ts { right: 28px;  bottom: 286px; width: 62px; height: 62px; font-size: 13px; }
   #touch b.sp { right: 104px; bottom: 324px; width: 62px; height: 62px; font-size: 13px;
                 color: #ffe6a8; border-color: rgba(255, 205, 120, 0.55); }
-  #touch b.rl { left: 176px;  bottom: 96px;  width: 66px; height: 66px; font-size: 13px; }
-  #touch b.sn { left: 176px;  bottom: 172px; width: 66px; height: 66px; font-size: 13px; }
+  /* 翻滚/冲刺也归右手：左手要一直推摇杆，腾不出手指。
+     翻滚要快速点，放在靠近拇指的下沿；冲刺是长按，摞在它上面 */
+  #touch b.rl { right: 224px; bottom: 58px;  width: 66px; height: 66px; font-size: 13px; }
+  #touch b.sn { right: 232px; bottom: 150px; width: 66px; height: 66px; font-size: 13px; }
   /* 断点由 main.js 按画面的逻辑尺寸判定后打成 class：
      转屏之后画面的宽高和视口是反的，媒体查询会问错方向 */
-  /* 窄屏摆不下左右两列，翻滚/冲刺挪到摇杆正上方，否则会压在开火和换弹上 */
-  body.narrow #touch b.rl { left: 26px;  bottom: 236px; }
-  body.narrow #touch b.sn { left: 100px; bottom: 236px; }
   /* 矮屏竖着摞不下四个招式键，压扁整圈 */
   body.short #touch b.hd { bottom: 196px; }
   body.short #touch b.sr { right: 100px; bottom: 226px; }
-  body.short #touch b.ts { right: 190px; bottom: 196px; }
+  /* 压扁那一圈时旋风键会压住瞄准键，往上让一格 */
+  body.short #touch b.ts { right: 190px; bottom: 240px; }
   body.short #touch b.sp { right: 254px; bottom: 152px; }
+  /* 压扁之后真空键占了冲刺的位子，把冲刺再往里让一格 */
+  body.short #touch b.sn { right: 330px; bottom: 92px; }
 
   /* 手机竖着拿的时候把整块画面转 90° 当横屏用 —— FPS 在竖屏下视野太窄。
      canvas 和虚拟按键都在 body 里，一起转，按键位置不用另算。
@@ -210,7 +224,7 @@
   }
 
   #feed {
-    position: absolute; right: 20px; top: 96px; text-align: right;
+    position: absolute; right: 20px; top: 136px; text-align: right;
     font-size: 13px; line-height: 1.9; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
   }
   #feed div { color: #b6c6d2; }
@@ -268,11 +282,12 @@
   }
   #loading p { font-size: 12px; letter-spacing: 0.28em; color: #55656f; text-transform: uppercase; }
 </style>
-  <script type="module" crossorigin src="./assets/index-COpKJBNJ.js"></script>
+  <script type="module" crossorigin src="./assets/index-BHsFM9r1.js"></script>
 </head>
 <body>
   <div id="hud">
     <div class="tag">EGGY <b>FPS</b> — 蛋宝格斗</div>
+    <div id="mute" title="静音 (M)">🔊</div>
     <div id="stats"></div>
     <div id="cross"><i class="ct"></i><i class="cb"></i><i class="cl"></i><i class="cr"></i></div>
     <div id="move"></div>
@@ -293,7 +308,7 @@
     <div id="board"></div>
     <div id="dead"><h2>被击倒</h2><p id="deadinfo"></p></div>
 
-    <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 开枪 &nbsp;·&nbsp; 右键 瞄准 &nbsp;·&nbsp; R 换弹 &nbsp;·&nbsp; J 波动拳 &nbsp;·&nbsp; K 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚</div>
+    <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 开枪 &nbsp;·&nbsp; 右键 瞄准 &nbsp;·&nbsp; R 换弹 &nbsp;·&nbsp; J 波动拳 &nbsp;·&nbsp; K 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚 &nbsp;·&nbsp; M 静音</div>
 
     <div id="touch">
       <div id="stick"><i></i></div>
