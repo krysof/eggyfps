@@ -122,20 +122,131 @@
     backdrop-filter: blur(6px); transition: transform 0.06s ease, background 0.06s ease;
   }
   #touch b.on { transform: scale(0.92); background: rgba(90, 165, 225, 0.55); }
-  /* 主招在最顺手的位置、也最大 —— 拇指默认落点就是波动拳 */
-  #touch b.hd { right: 24px;  bottom: 96px;  width: 92px; height: 92px; font-size: 17px;
+  /* 枪是主武器，开火占拇指默认落点、也最大；招式退到上面一圈 */
+  #touch b.fi { right: 22px;  bottom: 86px;  width: 104px; height: 104px; font-size: 18px;
+                border-color: rgba(255, 150, 110, 0.6); color: #ffd9cb; }
+  #touch b.am { right: 146px; bottom: 150px; width: 76px; height: 76px; }
+  #touch b.rd { right: 142px; bottom: 58px;  width: 62px; height: 62px; font-size: 12px; }
+  #touch b.hd { right: 32px;  bottom: 208px; width: 66px; height: 66px; font-size: 13px;
                 border-color: rgba(120, 205, 255, 0.6); }
-  #touch b.sr { right: 118px; bottom: 158px; width: 74px; height: 74px; }
-  #touch b.ts { right: 128px; bottom: 66px;  width: 74px; height: 74px; }
-  #touch b.sp { right: 34px;  bottom: 200px; width: 74px; height: 74px;
+  #touch b.sr { right: 112px; bottom: 244px; width: 62px; height: 62px; font-size: 13px; }
+  #touch b.ts { right: 28px;  bottom: 286px; width: 62px; height: 62px; font-size: 13px; }
+  #touch b.sp { right: 104px; bottom: 324px; width: 62px; height: 62px; font-size: 13px;
                 color: #ffe6a8; border-color: rgba(255, 205, 120, 0.55); }
   #touch b.rl { left: 176px;  bottom: 96px;  width: 66px; height: 66px; font-size: 13px; }
   #touch b.sn { left: 176px;  bottom: 172px; width: 66px; height: 66px; font-size: 13px; }
-  /* 竖屏摆不下左右两列，翻滚/冲刺挪到摇杆正上方，否则会压在旋风和升龙上 */
+  /* 竖屏摆不下左右两列，翻滚/冲刺挪到摇杆正上方，否则会压在开火和换弹上 */
   @media (max-width: 560px) {
     #touch b.rl { left: 26px;  bottom: 236px; }
     #touch b.sn { left: 100px; bottom: 236px; }
   }
+  /* 矮屏（横屏手机）竖着摞不下四个招式键，压扁整圈 */
+  @media (max-height: 440px) {
+    #touch b.hd { bottom: 196px; }
+    #touch b.sr { right: 100px; bottom: 226px; }
+    #touch b.ts { right: 190px; bottom: 196px; }
+    #touch b.sp { right: 254px; bottom: 152px; }
+  }
+
+  /* --- 混战 HUD ------------------------------------------------------ */
+  #hp {
+    position: absolute; left: 34px; bottom: 50px;
+    width: 260px; height: 16px; border-radius: 4px;
+    background: rgba(8, 12, 16, 0.62);
+    border: 1px solid rgba(220, 120, 110, 0.30);
+    overflow: hidden; backdrop-filter: blur(8px);
+  }
+  #hp i {
+    display: block; height: 100%; width: 100%;
+    background: linear-gradient(90deg, #c8352a, #f0705c 70%, #ffb9a4);
+    box-shadow: 0 0 12px rgba(240, 96, 74, 0.5);
+    transition: width 0.14s linear, background 0.3s ease;
+  }
+  #hp.low i { background: linear-gradient(90deg, #8e1d16, #d63a28); animation: lowhp 0.7s ease-in-out infinite; }
+  @keyframes lowhp { 50% { box-shadow: 0 0 26px rgba(255, 60, 40, 0.9); } }
+  #hpnum {
+    position: absolute; left: 302px; bottom: 46px;
+    font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums;
+    color: #ffd5cb; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+  }
+
+  #ammo {
+    position: absolute; right: 34px; bottom: 34px; text-align: right;
+    font-variant-numeric: tabular-nums; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+  }
+  #ammo b { font-size: 44px; font-weight: 800; color: #f2f7fa; line-height: 1; }
+  #ammo s { font-size: 20px; font-weight: 600; color: #7f929f; text-decoration: none; }
+  #ammo.dry b { color: #ff6a55; }
+  #ammo em {
+    display: block; font-style: normal; font-size: 12px; letter-spacing: 0.2em;
+    color: #d9a441; margin-top: 4px; opacity: 0; transition: opacity 0.15s ease;
+  }
+  #ammo.reloading em { opacity: 1; }
+
+  /* 技能冷却：四个格子，冷却时从下往上退回来 */
+  #skills { position: absolute; left: 34px; bottom: 84px; display: flex; gap: 7px; }
+  #skills div {
+    position: relative; width: 60px; height: 30px; border-radius: 5px; overflow: hidden;
+    background: rgba(8, 12, 16, 0.6); border: 1px solid rgba(150, 195, 225, 0.28);
+    display: grid; place-content: center; backdrop-filter: blur(8px);
+    font-size: 12px; font-weight: 700; color: #cfe2ef;
+  }
+  #skills div i {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 0;
+    background: rgba(4, 8, 12, 0.78); transition: height 0.08s linear;
+  }
+  #skills div.ready { border-color: rgba(120, 205, 255, 0.6); color: #eaf6ff; }
+  #skills div u {
+    position: absolute; left: 4px; top: 2px; font-size: 9px; color: #7f929f;
+    text-decoration: none; letter-spacing: 0.08em;
+  }
+
+  #feed {
+    position: absolute; right: 20px; top: 96px; text-align: right;
+    font-size: 13px; line-height: 1.9; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+  }
+  #feed div { color: #b6c6d2; }
+  #feed div.you { color: #ffe6a8; font-weight: 700; }
+  #feed span { color: #f2f7fa; font-weight: 700; }
+  #feed em { font-style: normal; color: #ff8a6a; }
+
+  #board {
+    position: absolute; left: 16px; top: 56px;
+    font-size: 12px; line-height: 1.85; font-variant-numeric: tabular-nums;
+    background: rgba(8, 12, 16, 0.5); border: 1px solid rgba(180, 205, 220, 0.14);
+    border-radius: 10px; padding: 8px 12px; backdrop-filter: blur(8px);
+    color: #93a7b5; min-width: 148px;
+  }
+  #board div { display: flex; justify-content: space-between; gap: 16px; }
+  #board div.me { color: #ffe6a8; font-weight: 700; }
+  #board b { color: #e6f0f7; font-weight: 700; }
+
+  /* 受击闪红 + 击杀提示，两个全屏遮罩 */
+  #vig {
+    position: absolute; inset: 0; opacity: 0;
+    background: radial-gradient(ellipse at center, transparent 42%, rgba(190, 20, 10, 0.75) 100%);
+  }
+  #hitmark {
+    position: absolute; left: 50%; top: 50%; width: 0; height: 0; opacity: 0;
+  }
+  #hitmark i {
+    position: absolute; width: 12px; height: 2px; background: #fff;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+  }
+  #hitmark i:nth-child(1) { transform: rotate(45deg)  translate(9px, 0); }
+  #hitmark i:nth-child(2) { transform: rotate(135deg) translate(9px, 0); }
+  #hitmark i:nth-child(3) { transform: rotate(225deg) translate(9px, 0); }
+  #hitmark i:nth-child(4) { transform: rotate(315deg) translate(9px, 0); }
+  #hitmark.head i { background: #ff5b4a; }
+
+  #dead {
+    position: absolute; inset: 0; display: grid; place-content: center; gap: 10px;
+    justify-items: center; background: rgba(60, 8, 4, 0.34); opacity: 0;
+    transition: opacity 0.25s ease; pointer-events: none;
+  }
+  #dead.on { opacity: 1; }
+  #dead h2 { font-size: 30px; font-weight: 800; letter-spacing: 0.2em; color: #ff8a6a; }
+  #dead p { font-size: 13px; letter-spacing: 0.2em; color: #c8b0aa; }
 
   #loading {
     position: fixed; inset: 0; display: grid; place-content: center; gap: 18px;
@@ -149,7 +260,7 @@
   }
   #loading p { font-size: 12px; letter-spacing: 0.28em; color: #55656f; text-transform: uppercase; }
 </style>
-  <script type="module" crossorigin src="./assets/index-DT6bHThn.js"></script>
+  <script type="module" crossorigin src="./assets/index-D7kThOS7.js"></script>
 </head>
 <body>
   <div id="hud">
@@ -158,10 +269,29 @@
     <div id="cross"><i class="ct"></i><i class="cb"></i><i class="cl"></i><i class="cr"></i></div>
     <div id="move"></div>
     <div id="gauge"><i></i></div>
-    <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 波动拳 &nbsp;·&nbsp; 右键 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚</div>
+
+    <div id="vig"></div>
+    <div id="hitmark"><i></i><i></i><i></i><i></i></div>
+    <div id="hp"><i></i></div>
+    <div id="hpnum">100</div>
+    <div id="ammo"><b>30</b><s>/210</s><em>换弹中…</em></div>
+    <div id="skills">
+      <div><u>J</u>波动<i></i></div>
+      <div><u>K</u>升龙<i></i></div>
+      <div><u>Q</u>旋风<i></i></div>
+      <div><u>F</u>真空<i></i></div>
+    </div>
+    <div id="feed"></div>
+    <div id="board"></div>
+    <div id="dead"><h2>被击倒</h2><p id="deadinfo"></p></div>
+
+    <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 开枪 &nbsp;·&nbsp; 右键 瞄准 &nbsp;·&nbsp; R 换弹 &nbsp;·&nbsp; J 波动拳 &nbsp;·&nbsp; K 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚</div>
 
     <div id="touch">
       <div id="stick"><i></i></div>
+      <b class="fi" data-btn="fire">开火</b>
+      <b class="am" data-btn="aim">瞄准</b>
+      <b class="rd" data-key="KeyR">换弹</b>
       <b class="hd" data-key="KeyJ">波动</b>
       <b class="sr" data-key="KeyK">升龙</b>
       <b class="ts" data-key="KeyQ">旋风</b>
