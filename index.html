@@ -159,6 +159,8 @@
      翻滚要快速点，放在靠近拇指的下沿；冲刺是长按，摞在它上面 */
   #touch b.rl { right: 224px; bottom: 58px;  width: 66px; height: 66px; font-size: 13px; }
   #touch b.sn { right: 232px; bottom: 150px; width: 66px; height: 66px; font-size: 13px; }
+  #touch b.nd { right: 300px; bottom: 96px;  width: 66px; height: 66px; font-size: 13px;
+                border-color: rgba(150, 230, 175, 0.62); color: #d8f7e2; }
   /* 断点由 main.js 按画面的逻辑尺寸判定后打成 class：
      转屏之后画面的宽高和视口是反的，媒体查询会问错方向 */
   /* 矮屏竖着摞不下四个招式键，压扁整圈 */
@@ -167,8 +169,9 @@
   /* 压扁那一圈时旋风键会压住瞄准键，往上让一格 */
   body.short #touch b.ts { right: 190px; bottom: 240px; }
   body.short #touch b.sp { right: 254px; bottom: 152px; }
-  /* 压扁之后真空键占了冲刺的位子，把冲刺再往里让一格 */
+  /* 压扁之后真空键占了冲刺的位子，把冲刺和手雷再往里让 */
   body.short #touch b.sn { right: 330px; bottom: 92px; }
+  body.short #touch b.nd { right: 300px; bottom: 20px; }
 
   /* 手机竖着拿的时候把整块画面转 90° 当横屏用 —— FPS 在竖屏下视野太窄。
      canvas 和虚拟按键都在 body 里，一起转，按键位置不用另算。
@@ -201,6 +204,21 @@
     font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums;
     color: #ffd5cb; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
   }
+
+  /* 手雷存量：弹药数字上面一行，空的那格暗着，一眼看出还剩几颗 */
+  #nade {
+    position: absolute; right: 34px; bottom: 108px;
+    display: flex; gap: 6px; justify-content: flex-end; align-items: center;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+  }
+  #nade span {
+    font-size: 11px; letter-spacing: 0.18em; color: #7f929f; margin-right: 4px;
+  }
+  #nade i {
+    display: block; width: 13px; height: 18px; border-radius: 7px 7px 6px 6px;
+    background: #9fe6b0; box-shadow: 0 0 10px rgba(120, 230, 150, 0.45);
+  }
+  #nade i.spent { background: rgba(150, 175, 190, 0.22); box-shadow: none; }
 
   #ammo {
     position: absolute; right: 34px; bottom: 34px; text-align: right;
@@ -292,7 +310,7 @@
   }
   #loading p { font-size: 12px; letter-spacing: 0.28em; color: #55656f; text-transform: uppercase; }
 </style>
-  <script type="module" crossorigin src="./assets/index-B-ZksZa8.js"></script>
+  <script type="module" crossorigin src="./assets/index-C_h2hJPt.js"></script>
 </head>
 <body>
   <div id="hud">
@@ -308,6 +326,7 @@
     <div id="hitmark"><i></i><i></i><i></i><i></i></div>
     <div id="hp"><i></i></div>
     <div id="hpnum">100</div>
+    <div id="nade"><span>手雷</span></div>
     <div id="ammo"><b>30</b><s>/210</s><em>换弹中…</em></div>
     <div id="skills">
       <div><u>E</u>波动<i></i></div>
@@ -319,12 +338,13 @@
     <div id="board"></div>
     <div id="dead"><h2>被击倒</h2><p id="deadinfo"></p></div>
 
-    <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 开枪 &nbsp;·&nbsp; 右键 瞄准 &nbsp;·&nbsp; R 换弹 &nbsp;·&nbsp; E 波动拳 &nbsp;·&nbsp; C 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚 &nbsp;·&nbsp; M 静音 &nbsp;·&nbsp; [ ] 调鼠标灵敏度</div>
+    <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 开枪 &nbsp;·&nbsp; 右键 手雷 &nbsp;·&nbsp; 中键 瞄准 &nbsp;·&nbsp; R 换弹 &nbsp;·&nbsp; E 波动拳 &nbsp;·&nbsp; C 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚 &nbsp;·&nbsp; M 静音 &nbsp;·&nbsp; [ ] 调鼠标灵敏度</div>
 
     <div id="touch">
       <div id="stick"><i></i></div>
       <b class="fi" data-btn="fire">开火</b>
       <b class="am" data-btn="aim">瞄准</b>
+      <b class="nd" data-key="Nade">手雷</b>
       <b class="rd" data-key="KeyR">换弹</b>
       <b class="hd" data-key="KeyE">波动</b>
       <b class="sr" data-key="KeyC">升龙</b>
