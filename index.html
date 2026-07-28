@@ -28,6 +28,16 @@
   }
   .tag b { color: #d9a441; font-weight: 700; }
 
+  /* 调灵敏度时的浮字，过一会儿自己淡出 */
+  #sens {
+    position: absolute; left: 50%; bottom: 24%; transform: translateX(-50%);
+    padding: 8px 20px; border-radius: 999px; white-space: nowrap;
+    background: rgba(8, 12, 16, 0.62); border: 1px solid rgba(180, 205, 220, 0.22);
+    font-size: 14px; letter-spacing: 0.08em; color: #dceaf4;
+    opacity: 0; transition: opacity 0.18s ease;
+  }
+  #sens.show { opacity: 1; }
+
   /* 静音键。手机上比键盘更需要它，所以放在 HUD 里而不是只做个 M 快捷键 */
   #mute {
     position: absolute; top: 12px; right: 16px;
@@ -282,12 +292,13 @@
   }
   #loading p { font-size: 12px; letter-spacing: 0.28em; color: #55656f; text-transform: uppercase; }
 </style>
-  <script type="module" crossorigin src="./assets/index-BHsFM9r1.js"></script>
+  <script type="module" crossorigin src="./assets/index-CGeP7Ezd.js"></script>
 </head>
 <body>
   <div id="hud">
     <div class="tag">EGGY <b>FPS</b> — 蛋宝格斗</div>
     <div id="mute" title="静音 (M)">🔊</div>
+    <div id="sens"></div>
     <div id="stats"></div>
     <div id="cross"><i class="ct"></i><i class="cb"></i><i class="cl"></i><i class="cr"></i></div>
     <div id="move"></div>
@@ -308,7 +319,7 @@
     <div id="board"></div>
     <div id="dead"><h2>被击倒</h2><p id="deadinfo"></p></div>
 
-    <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 开枪 &nbsp;·&nbsp; 右键 瞄准 &nbsp;·&nbsp; R 换弹 &nbsp;·&nbsp; J 波动拳 &nbsp;·&nbsp; K 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚 &nbsp;·&nbsp; M 静音</div>
+    <div id="lock">点击锁定鼠标 &nbsp;·&nbsp; WASD 移动 &nbsp;·&nbsp; 左键 开枪 &nbsp;·&nbsp; 右键 瞄准 &nbsp;·&nbsp; R 换弹 &nbsp;·&nbsp; J 波动拳 &nbsp;·&nbsp; K 升龙拳 &nbsp;·&nbsp; Q 龙卷旋风脚 &nbsp;·&nbsp; F 真空波动拳（气满）&nbsp;·&nbsp; Shift 冲刺 &nbsp;·&nbsp; 空格 掩体 / 翻滚 &nbsp;·&nbsp; M 静音 &nbsp;·&nbsp; [ ] 调鼠标灵敏度</div>
 
     <div id="touch">
       <div id="stick"><i></i></div>
